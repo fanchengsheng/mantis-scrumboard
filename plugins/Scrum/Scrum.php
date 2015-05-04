@@ -8,6 +8,8 @@ class ScrumPlugin extends MantisPlugin
 	const TOKEN_SCRUM_VERSION = 101;
 	const TOKEN_SCRUM_CATEGORY = 102;
 
+	const TOKEN_SCRUM_SUBMIT = 103;
+
 	# Duration constants (in seconds)
 	const DURATION_HOUR = 3600;
 	const DURATION_DAY = 86400;
@@ -19,17 +21,17 @@ class ScrumPlugin extends MantisPlugin
 		$this->description = plugin_lang_get("description");
 		$this->page = 'config_page';
 
-		$this->version = "0.3";
+		$this->version = "1.0";
 		$this->requires = array(
-			"MantisCore" => "1.2.6",
+			"MantisCore" => "1.2.0",
 		);
 		$this->uses = array(
 			"Source" => "0.16",
 		);
 
-		$this->author = "John Reese";
-		$this->contact = "john@noswap.com";
-		$this->url = "https://github.com/mantisbt-plugins/scrum";
+		$this->author = "modify";
+		$this->contact = "abc@noswap.com";
+		$this->url = "https://github.com/itantek/mantis-scrumboard.git";
 	}
 
 	public function config()
@@ -38,9 +40,9 @@ class ScrumPlugin extends MantisPlugin
 			#$g_status_enum_string = '10:new,20:feedback,30:acknowledged,40:confirmed,50:assigned,80:resolved,90:closed';
 			#"user" => array(),
 			"board_columns" => array(				
-				"new" => array(10, 20, 30, 50),
-				"confirmed" => array(40),
-				"resolved" => array(80),
+				"new" => array(10, 50),
+				"confirmed" => array(20, 30, 40),
+				"resolved" => array(80,90),
 			),
 
 			#$g_severity_enum_string = '10:feature,20:trivial,30:text,40:tweak,50:minor,60:major,70:crash,80:block';
@@ -69,7 +71,7 @@ class ScrumPlugin extends MantisPlugin
 			),
 
 			"token_expiry" => 30 * ScrumPlugin::DURATION_DAY,
-			"sprint_length" => 14 * ScrumPlugin::DURATION_DAY,
+			"sprint_length" => 7 * ScrumPlugin::DURATION_DAY,
 			"show_empty_status" => OFF,
 		);
 	}

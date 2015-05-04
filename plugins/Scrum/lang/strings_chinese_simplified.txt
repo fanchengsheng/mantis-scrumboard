@@ -16,12 +16,14 @@ $s_plugin_Scrum_time_hours = '%d hours left';
 $s_plugin_Scrum_time_1hour = 'less than 1 hour left';
 $s_plugin_Scrum_time_up = 'Sprint over';
 
+$s_plugin_Scrum_no_sprint ="no sprint";
+
 $s_plugin_Scrum_column_user = '用户';
 $s_plugin_Scrum_column_new = '未解决';
-$s_plugin_Scrum_column_confirmed = '进行中';
-$s_plugin_Scrum_column_resolved = '已完成';
+$s_plugin_Scrum_column_confirmed = '进行中[本周处理][今天处理 红色]';
+$s_plugin_Scrum_column_resolved = '已完成[昨天处理 红色]';
 
-$s_plugin_Scrum_config_title = 'Scrum Plugin Configuration';
+$s_plugin_Scrum_config_title = '敏捷看板配置';
 $s_plugin_Scrum_board_columns_label = 'Board Columns';
 $s_plugin_Scrum_board_columns_name = 'Name';
 $s_plugin_Scrum_board_columns_info = 'Define in which Board Column each status belongs.<br><ul><li><i>Name</i> is an internal code (refer to the language files for the actual display value)<br></li><li><i>Status</i> is a comma-delimited list of Statuses from the Enumeration to include in the Column</li></ul>';

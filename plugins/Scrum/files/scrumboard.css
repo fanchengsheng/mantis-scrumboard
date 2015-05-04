@@ -31,7 +31,7 @@ td.scrumcolumn hr {
 
 div.scrumblock {
 	float: left;
-	width: 230px;
+	width: 98%;
 	margin: 4px;
 
 	background: #FAF3AA;
@@ -45,26 +45,12 @@ div.scrumblock p {
 	margin: 3px;
 }
 
-div.scrumblock p.bugid {
-	float: left;
-	color: blue;
-}
-
-div.scrumblock p.commits {
-	float: right;
-	color: black;
-}
-
-div.scrumblock p.category {
-	font-weight: bold;
-}
 
 div.scrumblock p.summary {
 	clear: both;
 	width: 100%;
-	height: 5em;
+	height: 2.5em;
 	border-top: 1px solid #e7df8a;
-	border-bottom: 1px solid #e7df8a;
 	padding-top: 3px;
 	text-align: left;
 	overflow: hidden;
@@ -74,24 +60,49 @@ div.scrumblock span.project {
 	font-weight: bold;
 }
 
+div.scrumblock span.duedate {
+	border-left: 1px solid #e7df8a;
+	border-right: 1px solid #e7df8a;
+	margin: 2px;
+}
+
+div.scrumblock span.modifyhandle {
+	margin: 2px;
+	padding: 2px;
+}
+
+div.scrumblock span.modifystatus {
+	border-left: 1px solid #e7df8a;
+	border-right: 1px solid #e7df8a;
+	margin: 2px;
+	padding: 2px;
+}
+
+div.scrumblock span.resolvedate {
+	margin: 2px;
+	padding: 2px;
+	background: #deffc8;
+}
+
+div.scrumblock span.closedate {
+	border-left: 1px solid #e7df8a;
+	border-right: 1px solid #e7df8a;
+	margin: 2px;
+	padding: 2px;
+	background: #d8d8d8;
+}
+
+div.scrumblock span.estimate {
+	margin: 2px;
+	padding: 2px;
+	background: #fffbd9;
+}
+
+
 div.scrumblock p.priority {
 	float: left;
 	vertical-align: top;
 }
 
-div.scrumblock p.severity {
-	float: left;
-	width: 1.2em;
-	height: 1.2em;
-}
 
-div.scrumblock p.resolution {
-	float: right;
-	width: 1.2em;
-	height: 1.2em;
-}
-
-div.scrumblock p.handler {
-	padding-top: 3px;
-}
 
