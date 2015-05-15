@@ -6,8 +6,9 @@ due_date  修改任务执行人  修改任务状态   最后解决日期  最后
 priority bugid summary project  category
 
 
-
 				
 
-提示的红色 #ffddde
+需要自定义的两个字段
+Due_Date 日期
+Estimate_WH 数值类型(Estimate_Working_Hours)  
 

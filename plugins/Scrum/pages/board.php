@@ -15,6 +15,7 @@ $sprint_length = plugin_config_get( 'sprint_length' );
 $current_project = helper_get_current_project();
 $resolved_threshold = config_get( 'bug_resolved_status_threshold' );
 $current_date = strtotime(date("Y-m-d")." 00:00:00");
+$estimate_field_id = custom_field_get_id_from_name('Estimate_WH');
 
 # 取表单提交的参数  并把 表单参数保存到token
 # 取token里面保存的数据
@@ -116,6 +117,16 @@ foreach( $columns as $col ) {
 	$statuses = array_merge( $statuses, $col );
 }
 
+# 处理修改任务状态
+if( gpc_isset( 'modifystatus_bug_id')&&gpc_isset( 'modifystatus_bug_status')){
+	$submit_modifystatus_bug_id     = gpc_get_int( 'modifystatus_bug_id', 0 );
+	$submit_modifystatus_bug_status = gpc_get_int( 'modifystatus_bug_status',0 );
+	# 如果 modifystatus_bug_id modifystatus_bug_status 不为空就修改bug状态
+	if($submit_modifystatus_bug_id>0 && $submit_modifystatus_bug_status>0){
+		bug_set_field($submit_modifystatus_bug_id,"status",$submit_modifystatus_bug_status);
+	}
+}
+
 
 # Retrieve all bugs with the matching config filter and cache
 $bug_table = db_get_table( 'mantis_bug_table' );
@@ -169,6 +180,8 @@ if( $bug_count > 0 ) {
 	$resolved_percent = 0;
 }
 
+#取定义的预估工时字段 如果小于等于0就是没有定义
+$estimate_field_id = custom_field_get_id_from_name('Estimate_WH');
 
 html_page_top( plugin_lang_get( 'board' ) );
 ?>
@@ -180,9 +193,12 @@ html_page_top( plugin_lang_get( 'board' ) );
 
 	<!-- Scrum Board Title and filter -->
 	<tr>
-		<form action="<?php echo plugin_page( 'board' ) ?>" method="get">
+		<form id="form1" action="<?php echo plugin_page( 'board' ) ?>" method="get">
 			<input type="hidden" name="page" value="Scrum/board" />
 
+			<input type="hidden" name="modifystatus_bug_id" value="" />
+			<input type="hidden" name="modifystatus_bug_status" value="" />
+			
 			<td class="form-title" colspan="<?php echo count( $columns )+1 ?>">
  
 				<?php echo plugin_lang_get( 'board' ) ?>			
@@ -262,7 +278,43 @@ html_page_top( plugin_lang_get( 'board' ) );
 	<!-- Scrum Board Content-->
 <?php foreach ( $bugs as $handle =>$handleissue ){?>	
 	<tr class="row-1">
-		<td class="scrumcolumn" width="10%"><?php echo $handle > 0 ? user_get_realname ( $handle ) : '未指定' ?></td>	
+		<td class="scrumcolumn" width="10%">
+		<?php echo $handle > 0 ? user_get_realname ( $handle ) : '未指定';
+		$new_estimate_wh =0;
+		$confirmed_estimate_wh =0;
+		$resolved_estimate_wh =0;
+		if($estimate_field_id>0){ //如果定义的有预估工时字段，就取预估工时值
+			foreach( $columns["new"] as $status1 ){
+				if (isset ( $handleissue[$status1] )) {
+					foreach ( $handleissue[$status1] as $bug ){
+						$new_estimate_wh =$new_estimate_wh+get_due_date($bug->id, $estimate_field_id);
+					}
+				}				
+			}
+			foreach( $columns["confirmed"] as $status1 ){
+				if (isset ( $handleissue[$status1] )) {
+					foreach ( $handleissue[$status1] as $bug ){
+						$confirmed_estimate_wh =$confirmed_estimate_wh+get_due_date($bug->id, $estimate_field_id);
+					}
+				}
+			}
+			foreach( $columns["resolved"] as $status1 ){
+				if (isset ( $handleissue[$status1] )) {
+					foreach ( $handleissue[$status1] as $bug ){
+						$resolved_estimate_wh =$resolved_estimate_wh+get_due_date($bug->id, $estimate_field_id);
+					}
+				}
+			}
+			
+		}
+		?>
+		<br/>
+		未解决：<?php echo $new_estimate_wh;?>
+		<br/>
+		进行中：<?php echo $confirmed_estimate_wh;?>
+		<br/>
+		已完成：<?php echo $resolved_estimate_wh;?>
+		</td>	
 <?php
 	foreach( $columns as $column => $statuses ) {//显示三列 未解决 进行中 已解决
 ?>
@@ -286,6 +338,10 @@ html_page_top( plugin_lang_get( 'board' ) );
 				</span>
 				
 				<?php
+				if($estimate_field_id>0){ //如果定义的有预估工时字段，就取预估工时值
+					$estimate = get_due_date($bug->id, $estimate_field_id);
+				}
+				
 				if($bug->status < 80){
 					$due_date_color = "c9effe";
 					if ($bug->status < 80) {
@@ -300,69 +356,56 @@ html_page_top( plugin_lang_get( 'board' ) );
 					<?php 				
 					echo date( config_get( 'short_date_format' ), $due_date);?>
 					</span> 
-					
+					<!-- 
 					<span class="modifyhandle" title="修改任务执行人"> <a
 							href="javascript:clickmodiowner('25595','81');"> <img
 								src="plugins/Scrum/files/user.png" /></a>
 					</span>
+					-->
 					
 					<?php if($bug->status == 10 || $bug->status == 50){?>
 					<span class="modifystatus" title="修改任务状态"> <a
-							href="javascript:clickmodiowner('25595','81');"> <img
-								src="plugins/Scrum/files/bullet_go.png" /></a>
+							href="javascript:clickmodistatus('<?php echo $bug->id; ?>','40','<?php echo $estimate;?>');"> 
+							<img src="plugins/Scrum/files/bullet_go.png" /></a>
 					</span>	
 					<?php }else {?>
 					<span class="modifystatus" title="修改任务状态"> <a
-							href="javascript:clickmodiowner('25595','81');"> <img
-								src="plugins/Scrum/files/bullet_end.png" /></a>
+							href="javascript:clickmodistatus('<?php echo $bug->id; ?>','50','<?php echo $estimate;?>');"> 
+							<img src="plugins/Scrum/files/bullet_end.png" /></a>
 					</span>	
 					<?php }?>
 				<?php }?>
 				
 				
 				<?php 
-				if ($bug->status == 80){
-					$redate = history_get_date($bug->id,80);
-				}else {
-					$redate = 0;
-				}
 				if($bug->status > 70){
+					$resolve_color = "c9effe";
+					$redate = 0;
+					$redate = history_get_date($bug->id,80);
+					if ($redate > ($current_date - 86400) and $redate < $current_date) { // 昨天处理的是红色
+						$resolve_color = "ff0000";
+					}				
+						
+					
 				?>
-				<span class="resolvedate" title="最后解决日期">
+				<span class="resolvedate" style="background:#<?php echo $resolve_color;?>" title="最后解决日期">
 				<?php 
 				echo $redate < 100 ? "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;":date( config_get( 'short_date_format' ), $redate);?>
 				</span>
 				<?php }?>
 				
+				
 				<?php
-				if ($bug->status == 90){
-					$closedate = history_get_date($bug->id,90);
-				}else {
-					$closedate = 0;
-				}
-				if($bug->status > 70){
+				if($estimate_field_id>0){
 				?>
-				<span class="closedate" title="最后关闭日期">
-				<?php				
-				echo $closedate < 100 ? "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;":date( config_get( 'short_date_format' ), $closedate);?>
+				<span class="estimate" title="预估工时"> 
+					<?php echo $estimate;?>
 				</span>
 				<?php }?>
-				
-				<span class="estimate" title="预估工时"> <a
-						href="javascript:clickmodiowner('25595','81');">4</a>
-					</span>
 
 
 				</p>
 				
-				<?php  ?>
-				<p class="bugid"></p>
-
-
-
-
-
-
 
 				<p class="summary">
 				<?php
@@ -394,9 +437,36 @@ html_page_top( plugin_lang_get( 'board' ) );
 	} # foreach $handleissue
 ?>
 </table>
-test:				<?php 		
-				echo $current_date;
-				?>
+<script type="text/javascript">
+function clickmodistatus(bug_id,status,whs_flag)  {
+	if(whs_flag>24 || whs_flag==0)
+	{
+		alert("该issue 预估工时必须大于0且小于等于24小时");
+	}
+	else
+	{
+		var myForm = document.getElementById("form1");
+		myForm.modifystatus_bug_id.value =bug_id;
+		myForm.modifystatus_bug_status.value =status;
+		alert(myForm.modifystatus_bug_id.value);
+		alert(myForm.modifystatus_bug_status.value);
+		myForm.submit();
+	}
+}
+
+function clickmodiowner(bug_id,usercache) 
+{ 
+	URL="/modiowner.php?id="+bug_id+"&usercache="+usercache;
+	window.open (URL, 'newwindow', 'height=180, width=400, toolbar =no, menubar=no, scrollbars=no, resizable=no, location=no, status=no')
+	//window.open ("test.html", "newwindow", "height=300; width=400; toolbar =no; menubar=no; scrollbars=no; resizable=no; location=no; status=no")
+} 
+
+
+</script>
+<?php 	echo $wwwwwwwww;?>
 </br>
 <?php
 html_page_bottom();
+
+
+

@@ -20,7 +20,7 @@ $s_plugin_Scrum_no_sprint ="no sprint";
 
 $s_plugin_Scrum_column_user = '用户';
 $s_plugin_Scrum_column_new = '未解决';
-$s_plugin_Scrum_column_confirmed = '进行中[本周处理][今天处理 红色]';
+$s_plugin_Scrum_column_confirmed = '进行中[今天处理 红色表示过了DueDate]';
 $s_plugin_Scrum_column_resolved = '已完成[昨天处理 红色]';
 
 $s_plugin_Scrum_config_title = '敏捷看板配置';

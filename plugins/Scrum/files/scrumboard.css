@@ -1,6 +1,6 @@
 div.scrumbar {
 	float: left;
-	width: 48%;
+	width: 90%;
 	border: 1px dotted gray;
 	margin-right: 1em;
 	padding: 0;
@@ -84,18 +84,10 @@ div.scrumblock span.resolvedate {
 	background: #deffc8;
 }
 
-div.scrumblock span.closedate {
-	border-left: 1px solid #e7df8a;
-	border-right: 1px solid #e7df8a;
-	margin: 2px;
-	padding: 2px;
-	background: #d8d8d8;
-}
 
 div.scrumblock span.estimate {
 	margin: 2px;
 	padding: 2px;
-	background: #fffbd9;
 }
 
 
