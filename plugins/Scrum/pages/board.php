@@ -139,7 +139,7 @@ if( $current_project > 0 ) {
 if( $submit_handler_id > 0 ) {
 	$query .= " AND handler_id =" . $submit_handler_id;
 }
-$query .= ' ORDER BY status ASC, priority DESC, id DESC';
+$query .= ' ORDER BY handler_id DESC,status ASC, priority DESC, id DESC';
 $result = db_query_bound($query);
 
 $bug_ids = array();
@@ -279,7 +279,7 @@ html_page_top( plugin_lang_get( 'board' ) );
 <?php foreach ( $bugs as $handle =>$handleissue ){?>	
 	<tr class="row-1">
 		<td class="scrumcolumn" width="10%">
-		<?php echo $handle > 0 ? user_get_realname ( $handle ) : '未指定';
+		<?php echo $handle > 0 ? user_get_name ( $handle ) : '未指定';
 		$new_estimate_wh =0;
 		$confirmed_estimate_wh =0;
 		$resolved_estimate_wh =0;
@@ -313,7 +313,10 @@ html_page_top( plugin_lang_get( 'board' ) );
 		<br/>
 		进行中：<?php echo $confirmed_estimate_wh;?>
 		<br/>
-		已完成：<?php echo $resolved_estimate_wh;?>
+		已完成：		
+		<span <?php echo $resolved_estimate_wh<40 ? "style='background:#ff0000'":" " ?> title="已完成的预估工时">
+		<?php echo $resolved_estimate_wh;?>
+		</span>
 		</td>	
 <?php
 	foreach( $columns as $column => $statuses ) {//显示三列 未解决 进行中 已解决
@@ -448,8 +451,6 @@ function clickmodistatus(bug_id,status,whs_flag)  {
 		var myForm = document.getElementById("form1");
 		myForm.modifystatus_bug_id.value =bug_id;
 		myForm.modifystatus_bug_status.value =status;
-		alert(myForm.modifystatus_bug_id.value);
-		alert(myForm.modifystatus_bug_status.value);
 		myForm.submit();
 	}
 }
@@ -463,7 +464,6 @@ function clickmodiowner(bug_id,usercache)
 
 
 </script>
-<?php 	echo $wwwwwwwww;?>
 </br>
 <?php
 html_page_bottom();
