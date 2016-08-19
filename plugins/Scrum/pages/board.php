@@ -139,6 +139,7 @@ if( $current_project > 0 ) {
 if( $submit_handler_id > 0 ) {
 	$query .= " AND handler_id =" . $submit_handler_id;
 }
+$query .= ' AND status < 90';
 $query .= ' ORDER BY handler_id DESC,status ASC, priority DESC, id DESC';
 $result = db_query_bound($query);
 
