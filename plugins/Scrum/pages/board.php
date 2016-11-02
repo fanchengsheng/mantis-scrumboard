@@ -127,10 +127,13 @@ if( gpc_isset( 'modifystatus_bug_id')&&gpc_isset( 'modifystatus_bug_status')){
 	}
 }
 
+$search_start_time =strtotime($submit_start_year. "-" .$submit_start_month. "-" .$submit_start_day." 00:00:00");
+$search_end_time = strtotime($submit_end_year. "-" .$submit_end_month. "-" .($submit_end_day)." 00:00:00");
 
 # Retrieve all bugs with the matching config filter and cache
 $bug_table = db_get_table( 'mantis_bug_table' );
-$query = "SELECT id FROM {$bug_table} WHERE 1=1";
+#检索出所有未解决的问题 status < 80
+$query = "SELECT DISTINCT(a.id) FROM (SELECT id,handler_id,status,priority  FROM {$bug_table} WHERE (status < 80 ";
 
 if( $current_project > 0 ) {
 	$query .= " AND project_id IN (" . $current_project . ')';
@@ -139,8 +142,37 @@ if( $current_project > 0 ) {
 if( $submit_handler_id > 0 ) {
 	$query .= " AND handler_id =" . $submit_handler_id;
 }
-$query .= ' AND status < 90';
-$query .= ' ORDER BY handler_id DESC,status ASC, priority DESC, id DESC';
+
+#加上检索出在搜索时间段内的已解决未关闭的问题 status = 80
+$query .= ') OR (status = 80 ';
+if( $current_project > 0 ) {
+	$query .= " AND project_id IN (" . $current_project . ')';
+}
+
+if( $submit_handler_id > 0 ) {
+	$query .= " AND handler_id =" . $submit_handler_id;
+}
+$query .= ' AND last_updated > '.$search_start_time;
+$query .= ' AND last_updated < '.$search_end_time;
+$query .= ' ) ';
+
+#加上在搜索时间段内解决关闭的问题 （筛选加速条件选择的开始时间之后关闭的issue）  status = 90 
+$query .= " UNION SELECT a.id,a.handler_id,a.status,a.priority  FROM {$bug_table}  a,mantis_bug_history_table b WHERE a.id = b.bug_id";
+if( $current_project > 0 ) {
+	$query .= " AND a.project_id IN (" . $current_project . ')';
+}
+if( $submit_handler_id > 0 ) {
+	$query .= " AND a.handler_id =" . $submit_handler_id;
+}
+$query .= ' AND a.status = 90';
+$query .= ' AND a.last_updated > '.$search_start_time;
+
+$query .= ' AND b.field_name = "status" AND b.new_value = 80';
+$query .= ' AND b.date_modified > '.$search_start_time;
+$query .= ' AND b.date_modified < '.$search_end_time;
+
+$query .= ') AS a ORDER BY a.handler_id DESC,a.status ASC, a.priority DESC, a.id DESC';
+
 $result = db_query_bound($query);
 
 $bug_ids = array();
@@ -153,9 +185,7 @@ while( $row = db_fetch_array( $result ) ) {
 $bugs = array();//根据bug的不同状态进行分类存放
 $clean_bug_ids = array();//整理后的id array
 $resolved_count = 0; #已解决的问题计数
-  
-$search_start_time =strtotime($submit_start_year. "-" .$submit_start_month. "-" .$submit_start_day." 00:00:00");
-$search_end_time = strtotime($submit_end_year. "-" .$submit_end_month. "-" .($submit_end_day+1)." 00:00:00");
+
 foreach( $bug_ids as $bug_id ) {
 	$bug = bug_get( $bug_id,true);
 	if( $bug->status >= $resolved_threshold ) { //对已解决的问题做检索时间过滤
