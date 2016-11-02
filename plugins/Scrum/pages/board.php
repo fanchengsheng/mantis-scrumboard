@@ -189,12 +189,7 @@ $resolved_count = 0; #已解决的问题计数
 foreach( $bug_ids as $bug_id ) {
 	$bug = bug_get( $bug_id,true);
 	if( $bug->status >= $resolved_threshold ) { //对已解决的问题做检索时间过滤
-		if( $bug->last_updated < $search_start_time
-				 or $bug->last_updated >$search_end_time  ){
-			continue;
-		}else {
 			$resolved_count++; //对已解决以上的问题,进行数据统计
-		}
 	}
 	$clean_bug_ids[] =  $bug_id;
 	$bugs[$bug->handler_id][$bug->status][] = $bug;
